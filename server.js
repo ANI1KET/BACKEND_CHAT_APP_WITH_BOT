@@ -30,8 +30,9 @@ const detectIntent = require('./DialogFlow');
 
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: true,
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 
@@ -44,9 +45,6 @@ server.listen(port, () => {
 });
 
 io.on("connection", async (socket) => {
-  // console.log(socket);
-  // console.log(JSON.stringify(socket));
-  // console.log(JSON.stringify(socket.handshake.query));
   const user_id = socket.handshake.query["user_id"];
 
   console.log(`User ${user_id} connected ${socket.id}`);
@@ -242,7 +240,6 @@ io.on("connection", async (socket) => {
 
       socket.emit("start_chat", new_chat, false);
     }
-    // if yes => just emit event "start_chat" & send conversation details as payload
     else {
       socket.emit("start_chat", existing_conversations[0], true);
     }
@@ -277,7 +274,6 @@ io.on("connection", async (socket) => {
       text: message,
     };
 
-    // fetch OneToOneMessage Doc & push a new message to existing conversation
     const chat = await OneToOneMessage.findById(conversation_id);
     chat.messages.push(new_message);
 
@@ -625,6 +621,6 @@ process.on("unhandledRejection", (err) => {
   console.log(err);
   console.log("UNHANDLED REJECTION! Shutting down ...");
   server.close(() => {
-    process.exit(1); //  Exit Code 1 indicates that a container shut down, either because of an application failure.
+    process.exit(1);
   });
 });
